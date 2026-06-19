@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasky_task_management_mobile_app/screens/home_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   WelcomeScreen({super.key});
 
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> _saveFullName() async {
+    final username = _usernameController.text.trim();
+    if (username.isNotEmpty) {
+      // Save the username to shared preferences or any other storage
+      // For example, using shared_preferences package:
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', username);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +116,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 8),
                       TextFormField(
-                        controller: _fullNameController,
+                        controller: _usernameController,
                         style: TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                         decoration: InputDecoration(
@@ -148,11 +159,12 @@ class WelcomeScreen extends StatelessWidget {
                       height: 1.42,
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     // Navigate to the next screen or perform any action
                     if (_formKey.currentState!.validate()) {
                       // You can pass the full name to the next screen if needed
-                      Navigator.push(
+                      await _saveFullName(); // Save the full name to shared preferences
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => HomeScreen()),
                       );

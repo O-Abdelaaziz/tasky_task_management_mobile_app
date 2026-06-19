@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/screens/home_screen.dart';
 import 'package:tasky_task_management_mobile_app/screens/welcome_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  String? username = prefs.getString('username');
+
+  runApp(MyApp(username: username));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String? username;
+  const MyApp({super.key, required this.username});
 
   // This widget is the root of your application.
   @override
@@ -15,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Tasky',
       theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: WelcomeScreen(),
+      home: username == null ? WelcomeScreen() : HomeScreen(),
     );
   }
 }
