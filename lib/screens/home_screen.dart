@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/screens/add_new_task.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,6 +92,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
                   letterSpacing: 0.5,
+                ),
+              ),
+              Spacer(),
+              Align(
+                alignment: AlignmentGeometry.bottomEnd,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => AddNewTask(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0XFF15B86C),
+                    foregroundColor: Color(0XFFFFFCFC),
+                    fixedSize: Size(168, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  icon: Icon(Icons.add),
+                  label: Text('Add New Task'),
                 ),
               ),
             ],
