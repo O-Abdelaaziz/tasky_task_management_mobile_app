@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? username;
+  List<dynamic> finalList = [];
 
   Future<void> _loadUserame() async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,10 +23,25 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _loadTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final tasks = prefs.getString('tasks');
+    if (tasks != null) {
+      final decodedTaks = jsonDecode(tasks) as List<dynamic>;
+      print(decodedTaks);
+      setState(() {
+        finalList = decodedTaks;
+      });
+
+      print(finalList[0]['taskName']);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUserame();
+    _loadTasks();
   }
 
   @override

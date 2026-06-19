@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddNewTask extends StatefulWidget {
   const AddNewTask({super.key});
@@ -172,8 +175,24 @@ class _AddNewTaskState extends State<AddNewTask> {
                 ),
                 Spacer(),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    if (_formState.currentState?.validate() ?? false) {}
+                  onPressed: () async {
+                    if (_formState.currentState?.validate() ?? false) {
+                      Map<String, dynamic> task = {
+                        'taskName': taskNameComntroller.text,
+                        'taskDescription': taskDescriptionComntroller.text,
+                        'taskPriority': isHighPriority,
+                      };
+
+                      final preferences = await SharedPreferences.getInstance();
+                      final tasksJson = preferences.getString('tasks');
+                      List<dynamic> listTasks = [];
+                      if (tasksJson != null) {
+                        listTasks = jsonDecode(tasksJson);
+                      }
+                      listTasks.add(task);
+                      final tasksEncoded = jsonEncode(listTasks);
+                      await preferences.setString('tasks', tasksEncoded);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0XFF15B86C),
