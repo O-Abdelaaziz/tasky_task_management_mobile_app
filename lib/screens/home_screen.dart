@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasky_task_management_mobile_app/screens/add_new_task.dart';
@@ -30,6 +31,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0XFF181818),
+      floatingActionButton: SizedBox(
+        height: 40.0,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => AddNewTask(),
+              ),
+            );
+          },
+          backgroundColor: Color(0XFF15B86C),
+          foregroundColor: Color(0XFFFFFCFC),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100),
+          ),
+          icon: Icon(Icons.add),
+          label: Text('Add New Task'),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -84,39 +105,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              Text(
-                'Your Tasks',
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Color(0XFFFFFFFF),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              Spacer(),
-              Align(
-                alignment: AlignmentGeometry.bottomEnd,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => AddNewTask(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0XFF15B86C),
-                    foregroundColor: Color(0XFFFFFCFC),
-                    fixedSize: Size(168, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
+              SizedBox(height: 16.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Yuhuu ,Your work Is ',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                      color: Color(0XFFFFFFFF),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  icon: Icon(Icons.add),
-                  label: Text('Add New Task'),
-                ),
+                  SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Text(
+                        'almost done ! ',
+                        style: TextStyle(
+                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                          color: Color(0XFFFFFFFF),
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(width: 8.0),
+                      SvgPicture.asset(
+                        'assets/images/waving_hand.svg',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
