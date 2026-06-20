@@ -30,13 +30,7 @@ class _AddNewTaskState extends State<AddNewTask> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0XFF181818),
-      appBar: AppBar(
-        backgroundColor: Color(0XFF181818),
-        foregroundColor: Color(0XFFFFFFFF),
-        title: Text('Add New Task'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Add New Task')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -139,12 +133,12 @@ class _AddNewTaskState extends State<AddNewTask> {
                       cursorColor: Colors.white,
                       maxLines: 5,
                       style: const TextStyle(color: Colors.white),
-                      validator: (String? value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your task name';
-                        }
-                        return null;
-                      },
+                      // validator: (String? value) {
+                      //   if (value == null || value.trim().isEmpty) {
+                      //     return 'Please enter your task name';
+                      //   }
+                      //   return null;
+                      // },
                     ),
                     SizedBox(height: 20.0),
                     Row(
@@ -178,13 +172,6 @@ class _AddNewTaskState extends State<AddNewTask> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     if (_formState.currentState?.validate() ?? false) {
-
-                      TaskModel taskModel = TaskModel(
-                        taskName: taskNameComntroller.text,
-                        taskDescription: taskDescriptionComntroller.text,
-                        isHighPriority: isHighPriority,
-                      );
-
                       final preferences = await SharedPreferences.getInstance();
                       final tasksJson = preferences.getString('tasks');
                       List<dynamic> listTasks = [];
@@ -192,6 +179,14 @@ class _AddNewTaskState extends State<AddNewTask> {
                       if (tasksJson != null) {
                         listTasks = jsonDecode(tasksJson);
                       }
+
+                      TaskModel taskModel = TaskModel(
+                        id: listTasks.length - 1,
+                        taskName: taskNameComntroller.text,
+                        taskDescription: taskDescriptionComntroller.text,
+                        isHighPriority: isHighPriority,
+                      );
+
                       listTasks.add(taskModel.toJson());
                       final tasksEncoded = jsonEncode(listTasks);
                       await preferences.setString('tasks', tasksEncoded);

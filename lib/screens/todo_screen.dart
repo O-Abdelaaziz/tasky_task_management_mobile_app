@@ -1,10 +1,90 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-class TodoScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/models/task_model.dart';
+import 'package:tasky_task_management_mobile_app/widgets/task_list_widget.dart';
+
+class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
 
   @override
+  State<TodoScreen> createState() => _TodoScreenState();
+}
+
+class _TodoScreenState extends State<TodoScreen> {
+  List<TaskModel> tasks = [];
+  bool isLoading = false;
+  void _loadTasks() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final finalTasks = prefs.getString('tasks');
+    if (finalTasks != null) {
+      final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
+
+      setState(() {
+        tasks = decodedTaks
+            .map((element) {
+              return TaskModel.fromJson(element);
+            })
+            .where((element) => element.isDone == false)
+            .toList();
+        isLoading = false;
+      });
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(title: Text('To Do Tasks')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : TaskListWidget(
+                tasks: tasks,
+                onTap: (bool? value, int? index) async {
+                  setState(() {
+                    tasks[index!].isDone = value ?? false;
+                  });
+
+                  final pref = await SharedPreferences.getInstance();
+                  // final updatedTask = tasks
+                  //     .map((element) => element.toJson())
+                  //     .toList();
+
+                  final allData = pref.getString('tasks');
+                  if (allData != null) {
+                    List<TaskModel> allDataList = (jsonDecode(allData) as List)
+                        .map((element) => TaskModel.fromJson(element))
+                        .toList();
+                    final newInndex = allDataList.indexWhere(
+                      (e) => e.id == tasks[index!].id,
+                    );
+                    allDataList[newInndex] = tasks[index!];
+
+                    final encodeTasks = jsonEncode(allDataList);
+
+                    pref.setString('tasks', encodeTasks);
+                    _loadTasks();
+                  }
+                },
+              ),
+      ),
+    );
   }
 }

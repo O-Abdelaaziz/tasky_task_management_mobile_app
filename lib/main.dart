@@ -20,7 +20,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tasky',
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: Color(0XFF181818),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0XFF181818),
+          foregroundColor: Color(0XFFFFFFFF),
+          centerTitle: true,
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       home: username == null ? WelcomeScreen() : MainScreen(),
     );
