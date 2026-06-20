@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tasky_task_management_mobile_app/screens/home_screen.dart';
+import 'package:tasky_task_management_mobile_app/screens/main_screen.dart';
 import 'package:tasky_task_management_mobile_app/screens/welcome_screen.dart';
 
 void main() async {
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Tasky',
       theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: username == null ? WelcomeScreen() : HomeScreen(),
+      home: username == null ? WelcomeScreen() : MainScreen(),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasky_task_management_mobile_app/screens/home_screen.dart';
+import 'package:tasky_task_management_mobile_app/screens/main_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   WelcomeScreen({super.key});
@@ -166,7 +167,7 @@ class WelcomeScreen extends StatelessWidget {
                       await _saveFullName(); // Save the full name to shared preferences
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                        MaterialPageRoute(builder: (context) => MainScreen()),
                       );
                     } else {
                       // Show an error message or prompt the user to enter their name
