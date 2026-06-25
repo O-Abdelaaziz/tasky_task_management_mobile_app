@@ -9,8 +9,15 @@ class TaskListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return tasks.isEmpty
-        ? Center(child: Text('Not Todo Found!',style: TextStyle(color: Colors.white,fontSize: 24),))
+        ? Center(
+            child: Text(
+              'Not Todo Found!',
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          )
         : ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
             padding: EdgeInsets.only(bottom: 60),
             itemCount: tasks.length,
             itemBuilder: (context, index) {

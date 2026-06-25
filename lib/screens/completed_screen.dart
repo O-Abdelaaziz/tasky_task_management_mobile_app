@@ -13,32 +13,29 @@ class CompletedScreen extends StatefulWidget {
 }
 
 class _CompletedScreenState extends State<CompletedScreen> {
-   List<TaskModel> comleteTasks = [];
+  List<TaskModel> comleteTasks = [];
   bool isLoading = false;
-  void _loadTasks() async {
+  Future<void> _loadTasks() async {
     setState(() {
       isLoading = true;
     });
 
     final prefs = await SharedPreferences.getInstance();
     final finalTasks = prefs.getString('tasks');
+
     if (finalTasks != null) {
       final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
-
-      setState(() {
-        comleteTasks = decodedTaks
-            .map((element) {
-              return TaskModel.fromJson(element);
-            })
-            .where((element) => element.isDone == true)
-            .toList();
-        isLoading = false;
-      });
-
-      setState(() {
-        isLoading = false;
-      });
+      comleteTasks = decodedTaks
+          .map((element) => TaskModel.fromJson(element))
+          .where((element) => element.isDone == true)
+          .toList();
+    } else {
+      comleteTasks = [];
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -47,44 +44,56 @@ class _CompletedScreenState extends State<CompletedScreen> {
     _loadTasks();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Text(
+            'Completed Task',
+            style: TextStyle(color: Color(0xFFFFFCFC), fontSize: 20.0),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : TaskListWidget(
+                    tasks: comleteTasks,
+                    onTap: (bool? value, int? index) async {
+                      setState(() {
+                        comleteTasks[index!].isDone = value ?? false;
+                      });
 
-   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('To Do Tasks')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : TaskListWidget(
-                tasks: comleteTasks,
-                onTap: (bool? value, int? index) async {
-                   setState(() {
-                    comleteTasks[index!].isDone = value ?? false;
-                  });
+                      final pref = await SharedPreferences.getInstance();
+                      // final updatedTask = tasks
+                      //     .map((element) => element.toJson())
+                      //     .toList();
 
-                  final pref = await SharedPreferences.getInstance();
-                  // final updatedTask = tasks
-                  //     .map((element) => element.toJson())
-                  //     .toList();
+                      final allData = pref.getString('tasks');
+                      if (allData != null) {
+                        List<TaskModel> allDataList =
+                            (jsonDecode(allData) as List)
+                                .map((element) => TaskModel.fromJson(element))
+                                .toList();
+                        final newInndex = allDataList.indexWhere(
+                          (e) => e.id == comleteTasks[index!].id,
+                        );
+                        allDataList[newInndex] = comleteTasks[index!];
 
-                  final allData = pref.getString('tasks');
-                  if (allData != null) {
-                    List<TaskModel> allDataList = (jsonDecode(allData) as List)
-                        .map((element) => TaskModel.fromJson(element))
-                        .toList();
-                    final newInndex = allDataList.indexWhere(
-                      (e) => e.id == comleteTasks[index!].id,
-                    );
-                    allDataList[newInndex] = comleteTasks[index!];
+                        final encodeTasks = jsonEncode(allDataList);
 
-                    final encodeTasks = jsonEncode(allDataList);
-
-                    pref.setString('tasks', encodeTasks);
-                    _loadTasks();
-                  }
-                },
-              ),
-      ),
+                        pref.setString('tasks', encodeTasks);
+                        _loadTasks();
+                      }
+                    },
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

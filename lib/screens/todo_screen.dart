@@ -15,30 +15,27 @@ class TodoScreen extends StatefulWidget {
 class _TodoScreenState extends State<TodoScreen> {
   List<TaskModel> tasks = [];
   bool isLoading = false;
-  void _loadTasks() async {
+  Future<void> _loadTasks() async {
     setState(() {
       isLoading = true;
     });
 
     final prefs = await SharedPreferences.getInstance();
     final finalTasks = prefs.getString('tasks');
+
     if (finalTasks != null) {
       final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
-
-      setState(() {
-        tasks = decodedTaks
-            .map((element) {
-              return TaskModel.fromJson(element);
-            })
-            .where((element) => element.isDone == false)
-            .toList();
-        isLoading = false;
-      });
-
-      setState(() {
-        isLoading = false;
-      });
+      tasks = decodedTaks
+          .map((element) => TaskModel.fromJson(element))
+          .where((element) => element.isDone == false)
+          .toList();
+    } else {
+      tasks = [];
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -49,42 +46,54 @@ class _TodoScreenState extends State<TodoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('To Do Tasks')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : TaskListWidget(
-                tasks: tasks,
-                onTap: (bool? value, int? index) async {
-                  setState(() {
-                    tasks[index!].isDone = value ?? false;
-                  });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Text(
+            'To Dos',
+            style: TextStyle(color: Color(0xFFFFFCFC), fontSize: 20.0),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : TaskListWidget(
+                    tasks: tasks,
+                    onTap: (bool? value, int? index) async {
+                      setState(() {
+                        tasks[index!].isDone = value ?? false;
+                      });
 
-                  final pref = await SharedPreferences.getInstance();
-                  // final updatedTask = tasks
-                  //     .map((element) => element.toJson())
-                  //     .toList();
+                      final pref = await SharedPreferences.getInstance();
+                      // final updatedTask = tasks
+                      //     .map((element) => element.toJson())
+                      //     .toList();
 
-                  final allData = pref.getString('tasks');
-                  if (allData != null) {
-                    List<TaskModel> allDataList = (jsonDecode(allData) as List)
-                        .map((element) => TaskModel.fromJson(element))
-                        .toList();
-                    final newInndex = allDataList.indexWhere(
-                      (e) => e.id == tasks[index!].id,
-                    );
-                    allDataList[newInndex] = tasks[index!];
+                      final allData = pref.getString('tasks');
+                      if (allData != null) {
+                        List<TaskModel> allDataList =
+                            (jsonDecode(allData) as List)
+                                .map((element) => TaskModel.fromJson(element))
+                                .toList();
+                        final newInndex = allDataList.indexWhere(
+                          (e) => e.id == tasks[index!].id,
+                        );
+                        allDataList[newInndex] = tasks[index!];
 
-                    final encodeTasks = jsonEncode(allDataList);
+                        final encodeTasks = jsonEncode(allDataList);
 
-                    pref.setString('tasks', encodeTasks);
-                    _loadTasks();
-                  }
-                },
-              ),
-      ),
+                        pref.setString('tasks', encodeTasks);
+                        _loadTasks();
+                      }
+                    },
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -28,6 +28,26 @@ class MyApp extends StatelessWidget {
           foregroundColor: Color(0XFFFFFFFF),
           centerTitle: true,
         ),
+        switchTheme: SwitchThemeData(
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Color(0XFF15B86C);
+            }
+            return Colors.white;
+          }),
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.white;
+            }
+            return Color(0xFF9E9E9E);
+          }),
+          trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.transparent;
+            }
+            return Color(0xFF9E9E9E);
+          }),
+        ),
       ),
       debugShowCheckedModeBanner: false,
       home: username == null ? WelcomeScreen() : MainScreen(),

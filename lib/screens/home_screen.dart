@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasky_task_management_mobile_app/models/task_model.dart';
 import 'package:tasky_task_management_mobile_app/screens/add_new_task.dart';
-import 'package:tasky_task_management_mobile_app/widgets/task_list_widget.dart';
+import 'package:tasky_task_management_mobile_app/widgets/achieved_tasks_widget.dart';
+import 'package:tasky_task_management_mobile_app/widgets/high_priority_tasks_widget.dart';
+import 'package:tasky_task_management_mobile_app/widgets/sliver_task_list_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isChecked = false;
   List<TaskModel> tasks = [];
   bool isLoading = false;
+  int totalTasks = 0;
+  int doneTasks = 0;
+  double percent = 0;
 
   Future<void> _loadUserame() async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,22 +36,43 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isLoading = true;
     });
+
     final prefs = await SharedPreferences.getInstance();
     final finalTasks = prefs.getString('tasks');
+
     if (finalTasks != null) {
       final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
-
-      setState(() {
-        tasks = decodedTaks.map((element) {
-          return TaskModel.fromJson(element);
-        }).toList();
-        isLoading = false;
-      });
-
-      setState(() {
-        isLoading = false;
-      });
+      tasks = decodedTaks.map((element) {
+        return TaskModel.fromJson(element);
+      }).toList();
+    } else {
+      tasks = [];
     }
+
+    _calculatePercent();
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _calculatePercent() {
+    totalTasks = tasks.length;
+    doneTasks = tasks.where((task) => task.isDone).length;
+    percent = totalTasks == 0 ? 0 : doneTasks / totalTasks;
+  }
+
+  void _doneTask(bool? value, int? index) async {
+    setState(() {
+      tasks[index!].isDone = value ?? false;
+      _calculatePercent();
+    });
+
+    final pref = await SharedPreferences.getInstance();
+    final updatedTask = tasks.map((element) => element.toJson()).toList();
+    final encodeTasks = jsonEncode(updatedTask);
+
+    pref.setString('tasks', encodeTasks);
   }
 
   @override
@@ -82,134 +108,140 @@ class _HomeScreenState extends State<HomeScreen> {
           label: Text('Add New Task'),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/avatar.png'),
-                  ),
-                  SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        'Good Evening , $username',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          color: Color(0XFFFFFFFF),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.5,
-                          height: 1.5,
-                        ),
-                        textHeightBehavior: const TextHeightBehavior(
-                          leadingDistribution: TextLeadingDistribution.even,
-                        ),
+                      CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/avatar.png'),
                       ),
                       SizedBox(width: 8),
-                      Text(
-                        'One task at a time.One step closer.',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          color: Color(0XFFC6C6C6),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.25,
-                          height: 1.42,
-                        ),
-                        textHeightBehavior: const TextHeightBehavior(
-                          leadingDistribution: TextLeadingDistribution.even,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Good Evening , $username',
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.poppins().fontFamily,
+                              color: Color(0XFFFFFFFF),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0.5,
+                              height: 1.5,
+                            ),
+                            textHeightBehavior: const TextHeightBehavior(
+                              leadingDistribution: TextLeadingDistribution.even,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'One task at a time.One step closer.',
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.poppins().fontFamily,
+                              color: Color(0XFFC6C6C6),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0.25,
+                              height: 1.42,
+                            ),
+                            textHeightBehavior: const TextHeightBehavior(
+                              leadingDistribution: TextLeadingDistribution.even,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.light_mode, color: Colors.white),
+                        onPressed: () {
+                          // Handle light mode button press
+                        },
                       ),
                     ],
                   ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.light_mode, color: Colors.white),
-                    onPressed: () {
-                      // Handle light mode button press
+                  SizedBox(height: 16.0),
+                  Text(
+                    'Yuhuu ,Your work Is ',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                      color: Color(0XFFFFFFFF),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Text(
+                        'almost done ! ',
+                        style: TextStyle(
+                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                          color: Color(0XFFFFFFFF),
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(width: 8.0),
+                      SvgPicture.asset(
+                        'assets/images/waving_hand.svg',
+                        width: 32,
+                        height: 32,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  AchievedTasksWidget(
+                    doneTasks: doneTasks,
+                    totalTasks: totalTasks,
+                    percent: percent,
+                  ),
+                  SizedBox(height: 16.0),
+                  HighPriorityTasksWidget(
+                    tasks: tasks,
+                    onTap: (bool? value, int? index) {
+                      _doneTask(value, index);
                     },
+                    onRefresh: () {
+                      _loadTasks();
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24, bottom: 16),
+                    child: Text(
+                      'My Tasks',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.poppins().fontFamily,
+                        color: Color(0XFFFFFCFC),
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 0.5,
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Yuhuu ,Your work Is ',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-                        color: Color(0XFFFFFFFF),
-                        fontSize: 32,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    SizedBox(height: 4.0),
-                    Row(
-                      children: [
-                        Text(
-                          'almost done ! ',
-                          style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.plusJakartaSans().fontFamily,
-                            color: Color(0XFFFFFFFF),
-                            fontSize: 32,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        SizedBox(width: 8.0),
-                        SvgPicture.asset(
-                          'assets/images/waving_hand.svg',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24, bottom: 16),
-                      child: Text(
-                        'My Tasks',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          color: Color(0XFFFFFCFC),
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.5,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TaskListWidget(
-                        tasks: tasks,
-                        onTap: (bool? value, int? index) async {
-                          setState(() {
-                            tasks[index!].isDone = value ?? false;
-                          });
-
-                          final pref = await SharedPreferences.getInstance();
-                          final updatedTask = tasks
-                              .map((element) => element.toJson())
-                              .toList();
-                          final encodeTasks = jsonEncode(updatedTask);
-
-                          pref.setString('tasks', encodeTasks);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            isLoading
+                ? SliverToBoxAdapter(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : SliverTaskListWidget(
+                    tasks: tasks,
+                    onTap: (bool? value, int? index) async {
+                      _doneTask(value, index);
+                    },
+                  ),
+          ],
         ),
       ),
     );

@@ -88,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       // body: _defaultScreen,
-      body: _appScreens[_currentIndex],
+      body: SafeArea(child: _appScreens[_currentIndex]),
     );
   }
 }
