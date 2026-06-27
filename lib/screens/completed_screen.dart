@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/core/services/shared_preferences_manager.dart';
 import 'package:tasky_task_management_mobile_app/models/task_model.dart';
 import 'package:tasky_task_management_mobile_app/widgets/task_list_widget.dart';
 
@@ -20,8 +20,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
       isLoading = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final finalTasks = prefs.getString('tasks');
+    final finalTasks = SharedPreferencesManager().getString('tasks');
 
     if (finalTasks != null) {
       final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
@@ -35,6 +34,32 @@ class _CompletedScreenState extends State<CompletedScreen> {
 
     setState(() {
       isLoading = false;
+    });
+  }
+
+  Future<void> _deleteTask(int? id) async {
+    if (id == null) return;
+
+    final allData = SharedPreferencesManager().getString('tasks');
+    if (allData == null) return;
+
+    // 1. Load ALL tasks (not just high priority)
+    List<TaskModel> allTasks = (jsonDecode(allData) as List)
+        .map((element) => TaskModel.fromJson(element))
+        .toList();
+
+    // 2. Remove the task by id from the full list
+    allTasks.removeWhere((task) => task.id == id);
+
+    // 3. Save the full list back
+    await SharedPreferencesManager().setString(
+      'tasks',
+      jsonEncode(allTasks.map((e) => e.toJson()).toList()),
+    );
+
+    // 4. Update UI (filtered list for this screen)
+    setState(() {
+      comleteTasks.removeWhere((task) => task.id == id);
     });
   }
 
@@ -53,7 +78,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
           padding: const EdgeInsets.all(18.0),
           child: Text(
             'Completed Task',
-            style: TextStyle(color: Color(0xFFFFFCFC), fontSize: 20.0),
+            style: Theme.of(context).textTheme.labelSmall,
           ),
         ),
         Expanded(
@@ -68,12 +93,14 @@ class _CompletedScreenState extends State<CompletedScreen> {
                         comleteTasks[index!].isDone = value ?? false;
                       });
 
-                      final pref = await SharedPreferences.getInstance();
+                      // final pref = await SharedPreferences.getInstance();
                       // final updatedTask = tasks
                       //     .map((element) => element.toJson())
                       //     .toList();
 
-                      final allData = pref.getString('tasks');
+                      final allData = SharedPreferencesManager().getString(
+                        'tasks',
+                      );
                       if (allData != null) {
                         List<TaskModel> allDataList =
                             (jsonDecode(allData) as List)
@@ -86,9 +113,18 @@ class _CompletedScreenState extends State<CompletedScreen> {
 
                         final encodeTasks = jsonEncode(allDataList);
 
-                        pref.setString('tasks', encodeTasks);
+                        SharedPreferencesManager().setString(
+                          'tasks',
+                          encodeTasks,
+                        );
                         _loadTasks();
                       }
+                    },
+                    onEdit: () {
+                      _loadTasks();
+                    },
+                    onDelete: (int id) {
+                      _deleteTask(id);
                     },
                   ),
           ),

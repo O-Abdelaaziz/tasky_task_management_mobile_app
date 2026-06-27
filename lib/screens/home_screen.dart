@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/core/services/shared_preferences_manager.dart';
+import 'package:tasky_task_management_mobile_app/core/theme/theme_contorller.dart';
 import 'package:tasky_task_management_mobile_app/models/task_model.dart';
 import 'package:tasky_task_management_mobile_app/screens/add_new_task.dart';
 import 'package:tasky_task_management_mobile_app/widgets/achieved_tasks_widget.dart';
@@ -26,9 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double percent = 0;
 
   Future<void> _loadUserame() async {
-    final prefs = await SharedPreferences.getInstance();
+    //final prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? 'Guest';
+      username = SharedPreferencesManager().getString('username') ?? 'Guest';
     });
   }
 
@@ -37,8 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final finalTasks = prefs.getString('tasks');
+    //final prefs = await SharedPreferences.getInstance();
+    final finalTasks = SharedPreferencesManager().getString('tasks');
 
     if (finalTasks != null) {
       final decodedTaks = jsonDecode(finalTasks) as List<dynamic>;
@@ -68,11 +69,24 @@ class _HomeScreenState extends State<HomeScreen> {
       _calculatePercent();
     });
 
-    final pref = await SharedPreferences.getInstance();
+    //final pref = await SharedPreferences.getInstance();
     final updatedTask = tasks.map((element) => element.toJson()).toList();
     final encodeTasks = jsonEncode(updatedTask);
 
-    pref.setString('tasks', encodeTasks);
+    SharedPreferencesManager().setString('tasks', encodeTasks);
+  }
+
+  void _deleteTask(int? id) async {
+    if (id == null) return;
+
+    setState(() {
+      tasks.removeWhere((task) => task.id == id);
+      _calculatePercent();
+    });
+
+    final updatedTask = tasks.map((element) => element.toJson()).toList();
+    final encodeTasks = jsonEncode(updatedTask);
+    SharedPreferencesManager().setString('tasks', encodeTasks);
   }
 
   @override
@@ -127,14 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             'Good Evening , $username',
-                            style: TextStyle(
-                              fontFamily: GoogleFonts.poppins().fontFamily,
-                              color: Color(0XFFFFFFFF),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.5,
-                              height: 1.5,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium,
                             textHeightBehavior: const TextHeightBehavior(
                               leadingDistribution: TextLeadingDistribution.even,
                             ),
@@ -142,14 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(width: 8),
                           Text(
                             'One task at a time.One step closer.',
-                            style: TextStyle(
-                              fontFamily: GoogleFonts.poppins().fontFamily,
-                              color: Color(0XFFC6C6C6),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.25,
-                              height: 1.42,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall,
                             textHeightBehavior: const TextHeightBehavior(
                               leadingDistribution: TextLeadingDistribution.even,
                             ),
@@ -158,9 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Spacer(),
                       IconButton(
-                        icon: Icon(Icons.light_mode, color: Colors.white),
+                        icon: Icon(Icons.light_mode),
                         onPressed: () {
-                          // Handle light mode button press
+                          ThemeContorller.toggleTheme();
                         },
                       ),
                     ],
@@ -168,26 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 16.0),
                   Text(
                     'Yuhuu ,Your work Is ',
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-                      color: Color(0XFFFFFFFF),
-                      fontSize: 32,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.5,
-                    ),
+                    style: Theme.of(context).textTheme.displayLarge,
                   ),
                   SizedBox(height: 4.0),
                   Row(
                     children: [
                       Text(
                         'almost done ! ',
-                        style: TextStyle(
-                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-                          color: Color(0XFFFFFFFF),
-                          fontSize: 32,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.5,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                       SizedBox(width: 8.0),
                       SvgPicture.asset(
@@ -218,14 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.only(top: 24, bottom: 16),
                     child: Text(
                       'My Tasks',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        color: Color(0XFFFFFCFC),
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                        height: 1.5,
-                      ),
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
                   ),
                 ],
@@ -239,6 +220,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     tasks: tasks,
                     onTap: (bool? value, int? index) async {
                       _doneTask(value, index);
+                    },
+                    onEdit: () {
+                      _loadTasks();
+                    },
+                    onDelete: (int id) {
+                      _deleteTask(id);
                     },
                   ),
           ],

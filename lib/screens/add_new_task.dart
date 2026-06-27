@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/core/services/shared_preferences_manager.dart';
+import 'package:tasky_task_management_mobile_app/core/widgets/custom_text_form_field.dart';
 import 'package:tasky_task_management_mobile_app/models/task_model.dart';
 
 class AddNewTask extends StatefulWidget {
@@ -14,23 +15,28 @@ class AddNewTask extends StatefulWidget {
 
 class _AddNewTaskState extends State<AddNewTask> {
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
-  final TextEditingController taskNameComntroller = TextEditingController();
-  final TextEditingController taskDescriptionComntroller =
+  final TextEditingController taskNameController = TextEditingController();
+  final TextEditingController taskDescriptionController =
       TextEditingController();
   bool isHighPriority = true;
 
   @override
   void dispose() {
     super.dispose();
-    taskNameComntroller.dispose();
-    taskDescriptionComntroller.dispose();
+    taskNameController.dispose();
+    taskDescriptionController.dispose();
     isHighPriority = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add New Task')),
+      appBar: AppBar(
+        title: Text(
+          'Add New Task',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -41,47 +47,10 @@ class _AddNewTaskState extends State<AddNewTask> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Task Name',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        color: Color(0XFFFFFCFC),
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: 8.0),
-                    TextFormField(
-                      controller: taskNameComntroller,
-                      decoration: InputDecoration(
-                        hintText: 'Finish UI design for login screen',
-                        hintStyle: TextStyle(color: Color(0XFF6D6D6D)),
-                        filled: true,
-                        fillColor: Color(0XFF282828),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1,
-                          ),
-                        ),
-                        // 2. Border when validator returns an error and the field is focused
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      cursorColor: Colors.white,
-                      style: const TextStyle(color: Colors.white),
+                    CustomTextFormField(
+                      title: 'Task Name',
+                      controller: taskNameController,
+                      hintText: 'Finish UI design for login screen',
                       validator: (String? value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your task name';
@@ -90,55 +59,12 @@ class _AddNewTaskState extends State<AddNewTask> {
                       },
                     ),
                     SizedBox(height: 20.0),
-                    Text(
-                      'Task Description',
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        color: Color(0XFFFFFCFC),
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: 8.0),
-                    TextFormField(
-                      controller: taskDescriptionComntroller,
-                      decoration: InputDecoration(
-                        hintText:
-                            'Finish onboarding UI and hand off to \ndevs by Thursday.',
-                        hintStyle: TextStyle(color: Color(0XFF6D6D6D)),
-                        filled: true,
-                        fillColor: Color(0XFF282828),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1,
-                          ),
-                        ),
-                        // 2. Border when validator returns an error and the field is focused
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      cursorColor: Colors.white,
+                    CustomTextFormField(
+                      title: 'Task Description',
+                      controller: taskDescriptionController,
+                      hintText:
+                          'Finish onboarding UI and hand off to \ndevs by Thursday.',
                       maxLines: 5,
-                      style: const TextStyle(color: Colors.white),
-                      // validator: (String? value) {
-                      //   if (value == null || value.trim().isEmpty) {
-                      //     return 'Please enter your task name';
-                      //   }
-                      //   return null;
-                      // },
                     ),
                     SizedBox(height: 20.0),
                     Row(
@@ -172,8 +98,10 @@ class _AddNewTaskState extends State<AddNewTask> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     if (_formState.currentState?.validate() ?? false) {
-                      final preferences = await SharedPreferences.getInstance();
-                      final tasksJson = preferences.getString('tasks');
+                      final tasksJson = SharedPreferencesManager().getString(
+                        'tasks',
+                      );
+
                       List<dynamic> listTasks = [];
 
                       if (tasksJson != null) {
@@ -182,21 +110,22 @@ class _AddNewTaskState extends State<AddNewTask> {
 
                       TaskModel taskModel = TaskModel(
                         id: listTasks.length - 1,
-                        taskName: taskNameComntroller.text,
-                        taskDescription: taskDescriptionComntroller.text,
+                        taskName: taskNameController.text,
+                        taskDescription: taskDescriptionController.text,
                         isHighPriority: isHighPriority,
                       );
 
                       listTasks.add(taskModel.toJson());
                       final tasksEncoded = jsonEncode(listTasks);
-                      await preferences.setString('tasks', tasksEncoded);
+                      await SharedPreferencesManager().setString(
+                        'tasks',
+                        tasksEncoded,
+                      );
 
                       Navigator.of(context).pop(true);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0XFF15B86C),
-                    foregroundColor: Color(0XFFFFFCFC),
                     fixedSize: Size(MediaQuery.of(context).size.width - 32, 40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),

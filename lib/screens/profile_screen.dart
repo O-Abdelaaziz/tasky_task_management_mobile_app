@@ -1,6 +1,14 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tasky_task_management_mobile_app/core/services/shared_preferences_manager.dart';
+import 'package:tasky_task_management_mobile_app/core/theme/theme_contorller.dart';
+import 'package:tasky_task_management_mobile_app/main.dart';
+import 'package:tasky_task_management_mobile_app/screens/user_details_screen.dart';
+import 'package:tasky_task_management_mobile_app/screens/welcome_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,14 +18,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late final String username;
+  late String username;
+  late String motivationQuote;
   bool isLoading = true;
-  bool isDarkMode = true;
+  File? _selectedImage;
+  Uint8List? _imageBytes;
 
   Future<void> _loadUserame() async {
-    final prefs = await SharedPreferences.getInstance();
+    //final prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? 'Gest';
+      username = SharedPreferencesManager().getString('username') ?? 'Gest';
+      motivationQuote =
+          SharedPreferencesManager().getString('motivationQuote') ??
+          'Your Motivation Quote';
       isLoading = false;
     });
   }
@@ -41,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     'My Profile',
-                    style: TextStyle(color: Color(0xFFFFFCFC), fontSize: 20.0),
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -51,15 +64,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Stack(
                         alignment: AlignmentGeometry.bottomRight,
                         children: [
+                          // CircleAvatar(
+                          //   backgroundImage: _selectedImage == null
+                          //       ? AssetImage('assets/images/avatar.png')
+                          //       : FileImage(_selectedImage!),
+                          //   backgroundColor: Colors.transparent,
+                          //   radius: 60,
+                          // ),
                           CircleAvatar(
-                            backgroundImage: AssetImage(
-                              'assets/images/avatar.png',
-                            ),
-                            backgroundColor: Colors.transparent,
                             radius: 60,
+                            backgroundImage: _imageBytes == null
+                                ? const AssetImage('assets/images/avatar.png')
+                                : MemoryImage(_imageBytes!),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () async {
+                              // final XFile? image = await ImagePicker()
+                              //     .pickImage(source: ImageSource.gallery);
+
+                              // if (image != null) {
+                              //   setState(() {
+                              //     _selectedImage = File(image.path);
+                              //   });
+                              // }
+
+                              final XFile? image = await ImagePicker()
+                                  .pickImage(source: ImageSource.gallery);
+                              if (image != null) {
+                                final bytes = await image.readAsBytes();
+                                setState(() {
+                                  _imageBytes = bytes;
+                                });
+                              }
+                            },
                             child: Container(
                               width: 34,
                               height: 34,
@@ -80,24 +117,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       SizedBox(height: 8.0),
                       Text(
                         username,
-                        style: TextStyle(
-                          color: Color(0xFFFFFCFC),
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontSize: 20.0,
-                          letterSpacing: 0.5,
-                          height: 1.2,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                       SizedBox(height: 4.0),
                       Text(
-                        'One task at time, One step Closer.',
-                        style: TextStyle(
-                          color: Color(0xFFFFFCFC),
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          fontSize: 14.0,
-                          letterSpacing: 0.5,
-                          height: 1.4,
-                        ),
+                        motivationQuote,
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
                   ),
@@ -105,32 +130,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 24.0),
                 Text(
                   'Profle Info',
-                  style: TextStyle(
-                    color: Color(0xFFFFFCFC),
-                    fontFamily: GoogleFonts.poppins().fontFamily,
-                    fontSize: 20.0,
-                    letterSpacing: 0.5,
-                    height: 1.2,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 SizedBox(height: 24.0),
                 ListTile(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserDetailsScreen(
+                          username: username,
+                          motivationQuote: motivationQuote,
+                        ),
+                      ),
+                    );
+
+                    if (result != null && result) {
+                      _loadUserame();
+                    }
+                  },
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'User Details',
-                    style: TextStyle(
-                      color: Color(0xFFFFFCFC),
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                      fontSize: 16.0,
-                      letterSpacing: 0.5,
-                      height: 1.2,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  leading: Icon(Icons.person, color: Color(0xFFFFFCFC)),
-                  trailing: Icon(
-                    Icons.keyboard_arrow_right,
-                    color: Color(0xFFFFFCFC),
-                  ),
+                  leading: Icon(Icons.person),
+                  trailing: Icon(Icons.keyboard_arrow_right),
                 ),
                 SizedBox(height: 8),
                 Divider(color: Color(0xFF6E6E6E), thickness: 1),
@@ -138,46 +163,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Dark Mode',
-                    style: TextStyle(
-                      color: Color(0xFFFFFCFC),
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                      fontSize: 16.0,
-                      letterSpacing: 0.5,
-                      height: 1.2,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  leading: Icon(Icons.dark_mode, color: Color(0xFFFFFCFC)),
-                  trailing: Switch(
-                    value: isDarkMode,
-                    onChanged: (bool value) {
-                      setState(() {
-                        isDarkMode = value;
-                      });
+                  leading: Icon(Icons.dark_mode),
+                  trailing: ValueListenableBuilder(
+                    valueListenable: ThemeContorller.themeNotifier,
+                    builder: (context, ThemeMode mode, Widget? child) {
+                      return Switch(
+                        value:
+                            ThemeContorller.themeNotifier.value ==
+                            ThemeMode.dark,
+                        onChanged: (bool value) async {
+                          ThemeContorller.toggleTheme();
+                        },
+                      );
                     },
                   ),
                 ),
                 SizedBox(height: 8),
                 Divider(color: Color(0xFF6E6E6E), thickness: 1),
                 ListTile(
+                  onTap: () async {
+                    //final prefs = await SharedPreferences.getInstance();
+                    SharedPreferencesManager().remove('username');
+                    SharedPreferencesManager().remove('motivationQuote');
+                    SharedPreferencesManager().remove('tasks');
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Log Out',
-                    style: TextStyle(
-                      color: Color(0xFFFFFCFC),
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                      fontSize: 16.0,
-                      letterSpacing: 0.5,
-                      height: 1.2,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  leading: Icon(
-                    Icons.logout_outlined,
-                    color: Color(0xFFFFFCFC),
-                  ),
-                  trailing: Icon(
-                    Icons.keyboard_arrow_right,
-                    color: Color(0xFFFFFCFC),
-                  ),
+                  leading: Icon(Icons.logout_outlined),
+                  trailing: Icon(Icons.keyboard_arrow_right),
                 ),
                 SizedBox(height: 8),
                 Divider(color: Color(0xFF6E6E6E), thickness: 1),

@@ -19,7 +19,7 @@ class AchievedTasksWidget extends StatelessWidget {
       padding: EdgeInsets.all(16.0),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(0xFF282828),
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -30,23 +30,11 @@ class AchievedTasksWidget extends StatelessWidget {
             children: [
               Text(
                 'Achieved Tasks',
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Color(0XFFFFFFFF),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
                 '$doneTasks Out of $totalTasks Done',
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Color(0XFFF6F6F6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.25,
-                ),
+                style: Theme.of(context).textTheme.titleSmall,
               ),
             ],
           ),
@@ -69,13 +57,7 @@ class AchievedTasksWidget extends StatelessWidget {
               ),
               Text(
                 '${((percent * 100).toInt())}%',
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Color(0XFFF6F6F6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.25,
-                ),
+                style: Theme.of(context).textTheme.titleSmall,
               ),
             ],
           ),

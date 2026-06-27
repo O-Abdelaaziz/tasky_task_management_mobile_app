@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:tasky_task_management_mobile_app/models/task_model.dart';
+import 'package:tasky_task_management_mobile_app/widgets/task_item_widget.dart';
 
 class SliverTaskListWidget extends StatelessWidget {
   final List<TaskModel> tasks;
   final Function(bool?, int? index) onTap;
+  final Function(int id) onDelete;
+  final Function onEdit;
+
   const SliverTaskListWidget({
     super.key,
     required this.tasks,
     required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -17,7 +23,7 @@ class SliverTaskListWidget extends StatelessWidget {
             child: Center(
               child: Text(
                 'Not Todo Found!',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: Theme.of(context).textTheme.labelSmall,
               ),
             ),
           )
@@ -26,78 +32,38 @@ class SliverTaskListWidget extends StatelessWidget {
             sliver: SliverList.builder(
               itemCount: tasks.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 8.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF282828),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          activeColor: Color(0xFF15B86C),
-                          value: tasks[index].isDone,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadiusGeometry.circular(4),
-                          ),
-                          onChanged: (bool? value) {
-                            onTap(value, index);
-                          },
+                return TaskItemWidget(
+                  task: tasks[index],
+                  onChanged: (bool? value) {
+                    onTap(value, index);
+                  },
+                  onEdit: () {
+                    onEdit();
+                  },
+                  onDelete: (int id) async {
+                    final shouldDelete = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Delete task'),
+                        content: Text(
+                          'Are you sure you want to delete this task?',
                         ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                tasks[index].taskName,
-                                style: TextStyle(
-                                  color: tasks[index].isDone == true
-                                      ? Color(0xFFA0A0A0)
-                                      : Color(0xFFFFFCFC),
-                                  fontSize: 16.0,
-                                  overflow: TextOverflow.ellipsis,
-                                  decoration: tasks[index].isDone == true
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
-                                  decorationColor: Color(0xFFA0A0A0),
-                                ),
-                                maxLines: 1,
-                              ),
-                              if (tasks[index].taskDescription.isNotEmpty)
-                                Text(
-                                  tasks[index].taskDescription,
-                                  style: TextStyle(
-                                    color: Color(0xFFC6C6C6),
-                                    fontSize: 14.0,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                            ],
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text('Cancel'),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.more_vert,
-                            color: tasks[index].isDone == true
-                                ? Color(0xFFA0A0A0)
-                                : Color(0xFFFFFCFC),
-                            size: 24.0,
-                            semanticLabel:
-                                'Text to announce in accessibility modes',
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text('Delete'),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                    if (shouldDelete == true) {
+                      await onDelete(id);
+                    }
+                  },
                 );
               },
             ),

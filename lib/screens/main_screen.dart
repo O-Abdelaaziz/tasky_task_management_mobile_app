@@ -34,10 +34,6 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0XFF181818),
-        selectedItemColor: Color(0XFF15B86C),
-        unselectedItemColor: Color(0XFFC6C6C6),
         onTap: (int? index) {
           setState(() {
             _currentIndex = index ?? 0;

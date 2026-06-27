@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasky_task_management_mobile_app/core/services/shared_preferences_manager.dart';
+import 'package:tasky_task_management_mobile_app/core/widgets/custom_text_form_field.dart';
 import 'package:tasky_task_management_mobile_app/screens/main_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -14,8 +15,9 @@ class WelcomeScreen extends StatelessWidget {
     if (username.isNotEmpty) {
       // Save the username to shared preferences or any other storage
       // For example, using shared_preferences package:
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('username', username);
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('username', username);
+      await SharedPreferencesManager().setString('username', username);
     }
   }
 
@@ -42,13 +44,7 @@ class WelcomeScreen extends StatelessWidget {
                     SizedBox(width: 16),
                     Text(
                       'Tasky',
-                      style: TextStyle(
-                        color: Color(0XFFFFFFFF),
-                        fontSize: 28.0,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                        height: 0.857,
-                      ),
+                      style: Theme.of(context).textTheme.displayMedium,
                       textHeightBehavior: const TextHeightBehavior(
                         leadingDistribution: TextLeadingDistribution.even,
                       ),
@@ -62,13 +58,7 @@ class WelcomeScreen extends StatelessWidget {
                     Flexible(
                       child: Text(
                         'Welcome To Tasky',
-                        style: TextStyle(
-                          color: Color(0XFFFFFFFF),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.5,
-                          height: 0.857,
-                        ),
+                        style: Theme.of(context).textTheme.displaySmall,
                         overflow: TextOverflow.ellipsis,
                         textHeightBehavior: const TextHeightBehavior(
                           leadingDistribution: TextLeadingDistribution.even,
@@ -87,13 +77,9 @@ class WelcomeScreen extends StatelessWidget {
                 Text(
                   'Your productivity journey starts here.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0XFFFFFCFC),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0.5,
-                    height: 1.5,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.displaySmall!.copyWith(fontSize: 16),
                 ),
                 SizedBox(height: 24),
                 SvgPicture.asset(
@@ -107,35 +93,14 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Full Name',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                          color: Color(0XFFFFFCFC),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.5,
-                          height: 1.5,
-                        ),
-                      ),
                       SizedBox(height: 8),
-                      TextFormField(
+                      CustomTextFormField(
+                        title: 'User Name',
                         controller: _usernameController,
-                        style: TextStyle(color: Colors.white),
-                        cursorColor: Colors.white,
-                        decoration: InputDecoration(
-                          hintText: 'e.g. Abdelaaiz Ouakala',
-                          hintStyle: TextStyle(color: Color(0XFF8A8A8A)),
-                          filled: true,
-                          fillColor: Color(0XFF282828),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
+                        hintText: 'e.g. Abdelaaiz Ouakala',
                         validator: (String? value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your full name';
+                            return 'Please enter your user name';
                           }
                           return null;
                         },
@@ -148,8 +113,6 @@ class WelcomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0XFF15B86C),
-                      foregroundColor: Color(0XFFFFFCFC),
                       fixedSize: Size(
                         MediaQuery.of(context).size.width - 32,
                         40,
