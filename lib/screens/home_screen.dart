@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? username;
+  String? avatarPath;
   bool isChecked = false;
   List<TaskModel> tasks = [];
   bool isLoading = false;
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //final prefs = await SharedPreferences.getInstance();
     setState(() {
       username = SharedPreferencesManager().getString('username') ?? 'Guest';
+      avatarPath = SharedPreferencesManager().getString('avatarPath');
     });
   }
 
@@ -133,9 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: AssetImage('assets/images/avatar.png'),
+                        backgroundImage: avatarPath == null
+                            ? const AssetImage('assets/images/avatar.png')
+                            : FileImage(File(avatarPath!)),
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -146,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               leadingDistribution: TextLeadingDistribution.even,
                             ),
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: 4),
                           Text(
                             'One task at a time.One step closer.',
                             style: Theme.of(context).textTheme.titleSmall,

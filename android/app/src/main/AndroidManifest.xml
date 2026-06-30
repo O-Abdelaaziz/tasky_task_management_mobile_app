@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camera access -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Gallery access -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Fallback for older devices -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Optional: only if camera is required -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:label="tasky_task_management_mobile_app"
         android:name="${applicationName}"

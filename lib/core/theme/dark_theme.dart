@@ -94,7 +94,7 @@ ThemeData darkTheme = ThemeData(
     titleSmall: TextStyle(
       fontFamily: GoogleFonts.poppins().fontFamily,
       color: Color(0XFFFFFFFF),
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.5,
       height: 1.5,
